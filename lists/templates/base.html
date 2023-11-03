@@ -22,8 +22,12 @@
 								class="my-3 form-control form-control-lg"
 							>
 							{% csrf_token %}
+							{% if error %}
+							<div class="form-group has-error">
+								<span class="help-block">{{ error }}</span>
+							</div>
+							{% endif %}
 						</form>
-
 						{% block table %}
 						{% endblock %}
 					</div>
