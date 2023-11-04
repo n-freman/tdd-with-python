@@ -22,7 +22,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         if staging_server:
             self.live_server_url = 'http://' + staging_server # type: ignore
 
-    def tearDonw(self):
+    def tearDown(self):
         self.browser.quit()
 
     def wait_for_row_in_list_table(self, row_text):
