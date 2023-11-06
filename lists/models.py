@@ -6,7 +6,7 @@ class List(models.Model):
     objects: models.Manager # for pyright
 
     def get_absolute_url(self):
-        return reverse('view_list', args=[self.id])
+        return reverse('view_list', args=[self.id]) # type: ignore
 
 
 class Item(models.Model):
@@ -15,6 +15,13 @@ class Item(models.Model):
     list = models.ForeignKey(
         List,
         default=None,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
     )
+
+    class Meta:
+        ordering = ('id',)
+        unique_together = ('list', 'text')
+
+    def __str__(self):
+        return self.text
 
