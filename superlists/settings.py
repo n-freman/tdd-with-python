@@ -46,6 +46,7 @@ AUTH_USER_MODEL = 'accounts.User'
 AUTHENTICATION_BACKENDS = [
     'accounts.authentication.PasswordlessAuthenticationBackend'
 ]
+LOGOUT_REDIRECT_URL = '/'
 
 
 MIDDLEWARE = [
