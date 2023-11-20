@@ -4,12 +4,15 @@ from django.http import HttpRequest, response
 from django.utils.html import escape
 from django.contrib.auth import get_user_model
 
+import unittest
+from unittest.mock import patch, Mock
+
 from lists.forms import (
     DUPLICATE_ITEM_ERROR, EMPTY_ITEM_ERROR,
     ExistingListItemForm, ItemForm,
 )
 from lists.models import Item, List
-from lists.views import home_page
+from lists.views import home_page, new_list
 
 User = get_user_model()
 
@@ -137,7 +140,7 @@ class ListViewTest(TestCase):
         self.assertEqual(Item.objects.count(), 1)
 
 
-class NewListTest(TestCase):
+class NewListViewIntegratedTest(TestCase):
     def test_can_save_a_POST_request(self):
         response = self.client.post('/lists/new', data={'text': 'A new list item'})
 
@@ -145,22 +148,10 @@ class NewListTest(TestCase):
         new_item = Item.objects.first()
         self.assertEqual(new_item.text, 'A new list item')
 
-    def test_redirects_after_POST(self):
-        response = self.client.post('/lists/new', data={'text': 'A new list item'})
-        new_list = List.objects.first()
-        self.assertRedirects(response, f'/lists/{new_list.id}/')
-
-    def test_validation_errors_are_sent_back_to_home_page_template(self):
+    def test_for_invalid_input_doesnt_save_but_shows_errors(self):
         response = self.client.post('/lists/new', data={'text': ''})
-        self.assertEqual(response.status_code, 200) # type: ignore
-        self.assertTemplateUsed(response, 'home.html')
-        expected_error = escape("You can't have an empty list item")
-        self.assertContains(response, expected_error)
-
-    def test_invalid_list_items_arent_saved(self):
-        self.client.post('/lists/new', data={'text': ''})
         self.assertEqual(List.objects.count(), 0)
-        self.assertEqual(Item.objects.count(), 0)
+        self.assertContains(response, escape(EMPTY_ITEM_ERROR))
 
     def test_list_owner_is_saved_if_user_is_authenticated(self):
         user = User.objects.create(email='a@b.com')
@@ -168,6 +159,69 @@ class NewListTest(TestCase):
         self.client.post('/lists/new', data={'text': 'new item'})
         list_ = List.objects.first()
         self.assertEqual(list_.owner, user)
+        
+
+
+@patch('lists.views.NewListForm')
+class NewListViewUnitTest(unittest.TestCase):
+
+    def setUp(self):
+        self.request = HttpRequest()
+        self.request.POST['text'] = 'new list item'
+        self.request.user = Mock() # type: ignore
+
+    @staticmethod
+    def patch_mock_list_to_have_get_absolute_url(mockFormClass):
+        mock_form = mockFormClass.return_value
+        mock_form.save.return_value.get_absolute_url = lambda: '1'
+
+    def test_passes_POST_data_to_NewListForm(self, mockNewListForm):
+        self.patch_mock_list_to_have_get_absolute_url(mockNewListForm)  
+        new_list(self.request)
+        mockNewListForm.assert_called_once_with(data=self.request.POST)
+
+    def test_saves_form_with_owner_if_form_valid(self, mockNewListForm):
+        mock_form = mockNewListForm.return_value
+        mock_form.is_valid.return_value = True
+        self.patch_mock_list_to_have_get_absolute_url(mockNewListForm)  
+        new_list(self.request)
+        mock_form.save.assert_called_once_with(owner=self.request.user)
+
+    @patch('lists.views.redirect')
+    def test_redirects_to_form_returned_object_if_form_valid(
+        self,
+        mock_redirect,
+        mockNewListForm
+    ):
+        mock_form = mockNewListForm.return_value
+        mock_form.is_valid.return_value = True
+        self.patch_mock_list_to_have_get_absolute_url(mockNewListForm)  
+
+        response = new_list(self.request)
+
+        self.assertEqual(response, mock_redirect.return_value)
+        mock_redirect.assert_called_once_with(mock_form.save.return_value)
+
+    @patch('lists.views.render')
+    def test_renders_home_template_with_form_if_form_invalid(
+        self, mock_render, mockNewListForm
+    ):
+        mock_form = mockNewListForm.return_value
+        mock_form.is_valid.return_value = False
+        self.patch_mock_list_to_have_get_absolute_url(mockNewListForm)
+        
+        response = new_list(self.request)
+
+        self.assertEqual(response, mock_render.return_value)
+        mock_render.assert_called_once_with(
+                self.request, 'home.html', {'form': mock_form}
+        )
+
+    def test_does_not_save_if_form_invalid(self, mockNewListForm):
+        mock_form = mockNewListForm.return_value
+        mock_form.is_valid.return_value = False
+        new_list(self.request)
+        self.assertFalse(mock_form.save.called)
 
 
 class MyListsTest(TestCase):

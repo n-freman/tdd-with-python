@@ -1,3 +1,5 @@
+import time
+
 from django.conf import settings
 from django.contrib.auth import BACKEND_SESSION_KEY, SESSION_KEY, get_user_model
 from django.contrib.sessions.backends.db import SessionStore
@@ -49,6 +51,7 @@ class MyListsTest(FunctionalTest):
             lambda: self.assertEqual(self.browser.current_url, first_list_url)
         )
 
+        time.sleep(0.3)
         # She decides to start another list, just to see
         self.browser.get(self.live_server_url)
         self.add_list_item('Click cows')
@@ -65,6 +68,7 @@ class MyListsTest(FunctionalTest):
             lambda: self.assertEqual(self.browser.current_url, second_list_url)
         )
 
+        time.sleep(0.3)
         # She logs out. The "My lists option disappears"
         self.browser.find_element(By.LINK_TEXT, 'Log out').click()
         self.wait_for(lambda: self.assertEqual(
