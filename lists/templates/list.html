@@ -4,8 +4,31 @@
 
 {% block form_action %}{% url 'view_list' list.id %}{% endblock %}
 
+{% block share %}
+<h3 id="id_list_owner">{{ list.owner.email }}</h3>
+<section>
+	<form
+		action="{% url 'share_list' list.id %}"
+		method="POST"
+		class="my-3">
+		{% csrf_token %}
+		<input
+			type="email"
+			name="sharee"
+			placeholder="your-friend@example.com"
+			class="form-control form-control-lg"/>
+	</form>
+</section>
+<ul class="list-sharee list-group">
+	{% for friend in list.shared_with.all %}
+	<li class="list-group-item">{{ friend.email }}</li>
+	{% endfor %}
+</ul>
+{% endblock %}
+
 {% block table %}
-<table id="id_list_table" class="table bg-light">
+
+<table id="id_list_table" class="table table-dark table-striped">
 	{% for item in list.item_set.all %}
 	<tr>
 		<td>{{ forloop.counter }}: {{ item.text }}</td>

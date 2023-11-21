@@ -20,7 +20,7 @@ class SharingTest(FunctionalTest):
         self.addCleanup(lambda: quit_if_possible(edith_browser))
 
         # Her friend Oniciferous is also hanging out on lists site
-        oni_browser = webdriver.Safari()
+        oni_browser = webdriver.Chrome()
         self.addCleanup(lambda: quit_if_possible(oni_browser))
         self.browser = oni_browser
         self.create_pre_authenticated_session('oniciferous@example.com')
@@ -43,7 +43,7 @@ class SharingTest(FunctionalTest):
         self.browser = oni_browser
         MyListsPage(self).go_to_my_lists_page()
 
-        # He sess Edith's list in there!
+        # He sees Edith's list in there!
         self.browser.find_element(By.LINK_TEXT, 'Get help').click()
 
         self.wait_for(lambda: self.assertEqual(
