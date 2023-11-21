@@ -12,7 +12,7 @@ from lists.forms import (
     ExistingListItemForm, ItemForm,
 )
 from lists.models import Item, List
-from lists.views import home_page, new_list
+from lists.views import new_list
 
 User = get_user_model()
 
