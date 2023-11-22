@@ -1,4 +1,4 @@
-from django.views.generic import FormView
+from django.views.generic import FormView, CreateView
 from django.core.exceptions import ValidationError
 from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
@@ -26,6 +26,15 @@ def view_list(request, list_id):
             form.save()
             return redirect(list_)
     return render(request, 'list.html', {'list': list_, 'form': form})
+
+
+class NewListView(CreateView):
+    template_name = 'home.html'
+    form_class = NewListForm 
+    
+    def form_valid(self, form):
+        list_ = form.save(owner=self.request.user)
+        return redirect(list_)
 
 
 def new_list(request):
