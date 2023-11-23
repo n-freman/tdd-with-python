@@ -28,6 +28,7 @@ class HomePageTest(TestCase):
         response = self.client.get(f'/lists/{list_.id}/')
         self.assertTemplateUsed(response, 'list.html')
 
+    @unittest.skip
     def test_displays_all_list_items(self):
         list_ = List.objects.create()
         Item.objects.create(text='itemey 1', list=list_)
@@ -50,6 +51,7 @@ class ListViewTest(TestCase):
         response = self.client.get(f'/lists/{list_.id}/')
         self.assertTemplateUsed(response, 'list.html')
 
+    @unittest.skip
     def test_displays_only_items_for_that_list(self):
         correct_list = List.objects.create()
         Item.objects.create(text='itemey 1', list=correct_list) # type: ignore

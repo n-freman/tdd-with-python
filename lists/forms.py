@@ -49,3 +49,6 @@ class ExistingListItemForm(ItemForm):
             e.error_dict = {'text': [DUPLICATE_ITEM_ERROR]}
             self._update_errors(e)
 
+    def get_error(self):
+        return self.errors.as_data()['text'][0].message # type: ignore
+

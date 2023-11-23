@@ -28,11 +28,14 @@
 
 {% block table %}
 
-<table id="id_list_table" class="table table-dark table-striped">
-	{% for item in list.item_set.all %}
-	<tr>
-		<td>{{ forloop.counter }}: {{ item.text }}</td>
-	</tr>
-	{% endfor %}
+<table id="id_list_table" class="table table-dark table-striped text-dark">
 </table>
 {% endblock %}
+{% block scripts %}
+<script>
+$(document).ready(() => {
+	var url = "{% url 'api_list' list.id %}"
+	window.Superlists.initialize(url);
+})
+</script>
+{% endblock scripts %}

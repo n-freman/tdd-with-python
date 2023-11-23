@@ -21,5 +21,6 @@ urlpatterns = [
     path('', list_views.HomePageView.as_view(), name='home'),
     path('lists/', include('lists.urls')),
     path('accounts/', include('accounts.urls')),
+    path('api/', include('lists.api_urls'))
 ]
 
