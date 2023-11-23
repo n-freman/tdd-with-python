@@ -7,7 +7,7 @@ window.Superlists.updateItems = (url) => {
 			var item = response[i];
 			rows += '\n<tr><td>' + (i+1) + ': ' + item.text + '</td></tr>';
 		}
-		$('#id_list_table').html(rows);
+		$('#id_list_table tbody').html(rows);
 	})
 }
 
